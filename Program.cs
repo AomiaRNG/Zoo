@@ -156,7 +156,7 @@ namespace zoo
                     
                     var AQ = cage.animalQuantity;                    
                     cage.animalQuantity = cage.animalQuantity - localAnimalCount;
-                    for (int j = 0; j < cage.ageOfAnimals.Length; j++)
+                    for (int j = 0; j < cage.animalQuantity; j++)
                     {
                         cage.ageOfAnimals[j]++;
                         if (cage.ageOfAnimals[j] > MaxAgeOfAnimal(cage.kindOfAnimal.type))
