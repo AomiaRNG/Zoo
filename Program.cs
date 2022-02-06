@@ -22,7 +22,6 @@ namespace zoo
         public Food food;
         public uint foodAmount;
         public uint maxAge;
-        public uint age;
     }
 
     public enum GameState
@@ -34,7 +33,7 @@ namespace zoo
 
     class Program
     {
-        static Animal[] animals = new Animal[7] {
+        static Animal[] availableAnimals = new Animal[7] {
             new Animal{ food = Food.meat, type = "Lion", foodAmount = 4, maxAge = 20 },
             new Animal{ food = Food.meat, type = "Tiger", foodAmount = 3, maxAge = 30},
             new Animal{ food = Food.hay, type = "Cow", foodAmount = 4, maxAge = 25 },
@@ -44,15 +43,25 @@ namespace zoo
             new Animal{ food = Food.grain, type = "Parrot", foodAmount = 1, maxAge = 5 },
         };
 
+        static uint MaxAgeOfAnimal(string a)
+        {
+            for(int i = 0; i < availableAnimals.Length; i++)            
+                if (availableAnimals[i].type == a)
+                    return availableAnimals[i].maxAge;           
+            return 0;
+        }
         public class Cage
         {
-            public Animal animal;
+            public Animal kindOfAnimal;
             public uint animalQuantity = 0;
             public Foods foods = new Foods();
-            public Cage(Animal animal, uint quantity)
+            public uint[] ageOfAnimals;
+
+            public Cage(Animal animal, uint quantity, uint[] massOfAge)
             {
-                this.animal = animal;
+                this.kindOfAnimal = animal;
                 this.animalQuantity = quantity;
+                ageOfAnimals = massOfAge;
             }
         }
 
@@ -88,7 +97,8 @@ namespace zoo
         {
             private Foods foodOnStorage = new Foods();            
 
-            private static readonly (int, int) randInterval = (1, 4);
+            private static readonly (int, int) randIntervalQuantity = (1, 4);
+
 
             public List<Cage> cages = new List<Cage>();
 
@@ -104,13 +114,18 @@ namespace zoo
 
             public void StartGame(uint numberOfCages, uint countOfFood)
             {
-                SetFoodToStorage(countOfFood);//--!--
+                SetFoodToStorage(countOfFood);
                 Random r = new Random();
                 for (int i = 0; i < numberOfCages; i++)
                 {
-                    var animal = animals[r.Next(0, animals.Length)];
-                    uint quantity = (uint)r.Next(randInterval.Item1, randInterval.Item2);
-                    cages.Add(new Cage(animal, quantity));
+                    var animal = availableAnimals[r.Next(0, availableAnimals.Length)];
+                    uint quantity = (uint)r.Next(randIntervalQuantity.Item1, randIntervalQuantity.Item2);
+
+                    uint[] animals = new uint[quantity];
+                    for(int j = 0; j < quantity; j++)
+                        animals[j] = (uint)r.Next((int)MaxAgeOfAnimal(animal.type) - 2, (int)MaxAgeOfAnimal(animal.type));
+
+                    cages.Add(new Cage(animal, quantity,animals));
                 }
                 gameState = GameState.round;
             }
@@ -124,7 +139,6 @@ namespace zoo
             
             public List<(AnimalChangeInfo, AnimalChangeInfo)> NextFood(uint EatCount, uint CageCount)
             {
-                //Storage storage = new Storage(50);
                 List<(AnimalChangeInfo, AnimalChangeInfo)> newDieAnimal = new List<(AnimalChangeInfo, AnimalChangeInfo)>();
                 for (int i = 1; i <= cages.Count; i++)
                 {
@@ -132,19 +146,30 @@ namespace zoo
                     String animalType;
                     uint newAnimalsCount = 0;
                     var cage = cages[i - 1];
-                    Food food = cage.animal.food;
+                    Food food = cage.kindOfAnimal.food;
                     uint foodCount = cage.foods.ContainsKey(food) ? cage.foods[food] : 0;
+                    Random r = new Random();
 
-                    localAnimalCount = (uint)Math.Max(0, (int)(cage.animalQuantity - (foodCount / cage.animal.foodAmount)));
-                    animalType = cage.animal.type;
+
+                    localAnimalCount = (uint)Math.Max(0, (int)(cage.animalQuantity - (foodCount / cage.kindOfAnimal.foodAmount)));
+                    animalType = cage.kindOfAnimal.type;
                     
                     var AQ = cage.animalQuantity;                    
                     cage.animalQuantity = cage.animalQuantity - localAnimalCount;
-
-                    foodCount = (uint)Math.Max(0, (int)(foodCount - AQ * cage.animal.foodAmount));
+                    for (int j = 0; j < cage.ageOfAnimals.Length; j++)
+                    {
+                        cage.ageOfAnimals[j]++;
+                        if (cage.ageOfAnimals[j] > MaxAgeOfAnimal(cage.kindOfAnimal.type))
+                        {
+                            if (r.Next(0, 100) > 50)
+                                cage.animalQuantity--;
+                            localAnimalCount++;
+                        }
+                    }
+                    foodCount = (uint)Math.Max(0, (int)(foodCount - AQ * cage.kindOfAnimal.foodAmount));
                                         
-                    Random r = new Random();
-                    var ProbablyNewAnimal = foodCount / cage.animal.foodAmount > cage.animalQuantity ? cage.animalQuantity : foodCount / cage.animal.foodAmount;
+                    
+                    var ProbablyNewAnimal = foodCount / cage.kindOfAnimal.foodAmount > cage.animalQuantity ? cage.animalQuantity : foodCount / cage.kindOfAnimal.foodAmount;
                     for (int j = 0; j < ProbablyNewAnimal; j++)
                         if (r.Next(1, 100) <= 30)
                             newAnimalsCount++;
@@ -212,7 +237,6 @@ namespace zoo
                 string b;
                 b = string.Join("", a.Select(kv => kv.Value + " " + kv.Key + "\n"));
                 Console.WriteLine("\nFood on storage: "+ '\n' + b);
-
             }
 
             public void Round()
@@ -291,7 +315,7 @@ namespace zoo
 
                     string a = string.Join(",", cage.foods.Select(kv => kv.Value + " " + kv.Key));
                     a = (a == "" ? "0" : a);
-                    Console.WriteLine($"Enclosure {i + 1}: {cage.animal.type}.\tQuantity: {cage.animalQuantity}.\tEat: {cage.animal.food}.\tFood: {a}.");
+                    Console.WriteLine($"Enclosure {i + 1}: {cage.kindOfAnimal.type}.\tQuantity: {cage.animalQuantity}.\tEat: {cage.kindOfAnimal.food}.\tFood: {a}.");
                 }
             }
 

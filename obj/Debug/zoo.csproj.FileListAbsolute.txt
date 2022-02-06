@@ -5,3 +5,10 @@ C:\Users\User\source\repos\zoo\zoo\obj\Debug\zoo.csprojAssemblyReference.cache
 C:\Users\User\source\repos\zoo\zoo\obj\Debug\zoo.csproj.CoreCompileInputs.cache
 C:\Users\User\source\repos\zoo\zoo\obj\Debug\zoo.exe
 C:\Users\User\source\repos\zoo\zoo\obj\Debug\zoo.pdb
+C:\Users\Root\source\repos\Zoo\bin\Debug\zoo.exe.config
+C:\Users\Root\source\repos\Zoo\bin\Debug\zoo.exe
+C:\Users\Root\source\repos\Zoo\bin\Debug\zoo.pdb
+C:\Users\Root\source\repos\Zoo\obj\Debug\zoo.csproj.AssemblyReference.cache
+C:\Users\Root\source\repos\Zoo\obj\Debug\zoo.csproj.CoreCompileInputs.cache
+C:\Users\Root\source\repos\Zoo\obj\Debug\zoo.exe
+C:\Users\Root\source\repos\Zoo\obj\Debug\zoo.pdb
